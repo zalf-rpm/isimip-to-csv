@@ -45,8 +45,8 @@ def main():
         "start-y": 1,
         "end-y": -1,
         "start-year": 1971,
-        "start-month": 1,
         "end-year": 2005,
+        "start-month": 1,
         "end-month": 12
     }
     if len(sys.argv) > 1:
@@ -56,20 +56,20 @@ def main():
                 config[kkk] = int(vvv)
 
     elem_to_varname = {
-        "tmin": ["tasmin_bced_1960_1999", "tasminAdjust"],
-        "tavg": ["tas_bced_1960_1999", "tasAdjust"],
-        "tmax": ["tasmax_bced_1960_1999", "tasmaxAdjust"],
-        "precip": ["pr_bced_1960_1999", "prAdjust"],
-        "relhumid": ["hurs", "hurs"],
-        "globrad": ["rsds_bced_1960_1999", "rsdsAdjust"],
-        "wind": ["wind_bced_1960_1999", "windAdjust"]
+        "tmin": {"prefix": "tasmin_bced_1960_1999", "var": "tasminAdjust", "folder": "tmin/"},
+        "tavg": {"prefix": "tas_bced_1960_1999", "var": "tasAdjust", "folder": "tavg/"},
+        "tmax": {"prefix": "tasmax_bced_1960_1999", "var": "tasmaxAdjust", "folder": "tmax/"},
+        "precip": {"prefix": "pr_bced_1960_1999", "var": "prAdjust", "folder": "precip/"},
+        "relhumid": {"prefix": "hurs", "var": "hurs", "folder": "relhumid/"},
+        "globrad": {"prefix": "rsds_bced_1960_1999", "var": "rsdsAdjust", "folder": "short_rad/"},
+        "wind": {"prefix": "wind_bced_1960_1999", "var": "windAdjust", "folder": "wind/"}
     }
 
     files = defaultdict(lambda: defaultdict(dict))
     for start_year in range(1971, 2005, 10):
-        for elem, prefix, _ in elem_to_varname.iteritems():
-            end_year = start_year + 9 if year < 2001 else 4
-            files[(start_year, end_year)][elem] = config["path_to_data"] + prefix + "_ipsl-cm5a-lr_hist_" + str(start_year) + "_" + str(end_year)
+        for elem, dic in elem_to_varname.iteritems():
+            end_year = start_year + (9 if start_year < 2001 else 4)
+            files[(start_year, end_year)][elem] = config["path_to_data"] + dic["folder"] + dic["prefix"] + "_ipsl-cm5a-lr_hist_" + str(start_year) + "-" + str(end_year) + ".nc"
 
 
     def write_files(cache):
@@ -98,71 +98,62 @@ def main():
 
 
     write_files_threshold = 50 #ys
+
     for (start_year, end_year), elem_to_file in files.iteritems():
+        datasets = {}
+        for elem, filepath in elem_to_file.iteritems():
+            datasets[elem] = Dataset(filepath) 
+
+        sum_days = 0
         for year in range(start_year, end_year + 1):
+
+            start_year = time.clock()
+            days_in_year = date(year, 12, 31).timetuple().tm_yday
+
             if year < config["start-year"]:
+                sum_days = sum_days + days_in_year
                 continue
             if year > config["end-year"]:
                 break
 
-            #print "year: ", year, "months: ",
-            for month in (1, 12 + 1):
-                if year == config["start-year"] and month < config["start-month"]:
-                    continue
-                if year == config["end-year"] and month > config["end-month"]:
+            print "year:", year, "sum-days:", sum_days, "ys ->",
+
+            days_per_loop = 31
+            for doy_i in range(date(year, config["start-month"], 1).timetuple().tm_yday - 1, days_in_year, days_per_loop):
+
+                if (date(year, config["end-month"] + 1, 1).timetuple().tm_yday - 1 if config["end-month"] < 12 else date(year, 12, 31).timetuple().tm_yday) <= doy_i:
                     break
 
-                print "year:", year, "month:", month, "ys ->",
+                end_i = doy_i + days_per_loop if doy_i + days_per_loop < days_in_year else days_in_year
                 data = {}
-                for elem, filepath in elems.iteritems():
-                    ds = Dataset(filepath)
-                    data[elem] = np.copy(ds.variables[elem_to_varname[elem]])
-                    ds.close()
+                for elem, ds in datasets.iteritems():
+                    data[elem] = np.copy(ds.variables[elem_to_varname[elem]["var"]][sum_days + doy_i : end_i])
 
                 ref_data = data["tavg"]
-                #no_of_days = len(ref_data.variables["time"])
                 no_of_days = ref_data.shape[0]
-
-                start_month = time.clock()
                 cache = defaultdict(list)
 
                 for y in range(config["start-y"] - 1, ref_data.shape[1] if config["end-y"] < 0 else config["end-y"]):
-                    #print "y: ", y, "->"
-                    start_y = time.clock()
-                    #print y,
                     for x in range(ref_data.shape[2]):
-                        #print x,
 
-                        if int(ref_data[0, y, x]) == 9999:
+                        if int(ref_data[0, y, x]) > 1.0E19:
                             continue
-
-                        #lat = ref_data.variables["lat"][y, x]
-                        #lon = ref_data.variables["lon"][y, x]
 
                         for i in range(no_of_days):
                             row = [
-                                date(year, month, i+1).strftime("%Y-%m-%d"),
-                                str(data["tmin"][i, y, x]),
-                                str(data["tavg"][i, y, x]),
-                                str(data["tmax"][i, y, x]),
-                                str(data["precip"][i, y, x]),
-                                str(data["RH"][i, y, x]),
-                                str(round(data["SIS"][i, y, x] * 3600 / 1000000, 4)),
-                                str(data["FF"][i, y, x])
-
-                                #str(data["tmin"].variables["temperature"][i][y][x]),
-                                #str(data["tavg"].variables["temperature"][i][y][x]),
-                                #str(data["tmax"].variables["temperature"][i][y][x]),
-                                #str(data["precip"].variables["precipitation"][i][y][x]),
-                                #str(data["RH"].variables["humidity"][i][y][x]),
-                                #str(round(data["SIS"].variables["SIS"][i][y][x] * 3600 / 1000000, 4)),
-                                #str(data["FF"].variables["FF"][i][y][x])
+                                (date(year, 1, 1) + timedelta(days=i)).strftime("%Y-%m-%d"),
+                                str(round(data["tmin"][i, y, x] - 273.15, 2)),
+                                str(round(data["tavg"][i, y, x] - 273.15, 2)),
+                                str(round(data["tmax"][i, y, x] - 273.15, 2)),
+                                str(round(data["precip"][i, y, x] * 60 * 60 * 24, 2)),
+                                str(round(data["relhumid"][i, y, x], 2)),
+                                str(round(data["globrad"][i, y, x] * 60 * 60 * 24 / 1000000, 4)),
+                                str(round(data["wind"][i, y, x], 2))
                             ]
                             cache[(y,x)].append(row)
-                    
-                    end_y = time.clock()
+
                     print y, #str(y) + "|" + str(int(end_y - start_y)) + "s ",
-                
+
                     if y > config["start-y"] and y % write_files_threshold == 0:
                         print ""
                         s = time.clock()
@@ -171,14 +162,17 @@ def main():
                         e = time.clock()
                         print "wrote", write_files_threshold, "ys in", (e-s), "seconds"
 
-                #for dataset in data.values():
-                #    dataset.close()
                 print ""
 
                 #write remaining cache items
                 write_files(cache)
 
-                end_month = time.clock()
-                print "running month", month, "took", (end_month - start_month), "seconds"
+                end_year = time.clock()
+                print "running year", year, "took", (end_year - start_year), "seconds"
+
+            sum_days = sum_days + days_in_year
+
+        for _ in datasets.values():
+            _.close()
 
 main()
