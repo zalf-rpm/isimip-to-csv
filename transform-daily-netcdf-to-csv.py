@@ -42,12 +42,12 @@ def main():
         "path_to_data": "m:/data/climate/isimip/grids/daily/" if LOCAL_RUN else "/archiv-daten/md/data/climate/isimip/grids/daily/",
         #"path_to_output": "m:/data/climate/dwd/csvs/germany/" if LOCAL_RUN else "/archiv-daten/md/data/climate/dwd/csvs/germany/",
         "path_to_output": "g:/csvs/earth/" if LOCAL_RUN else "/archiv-daten/md/data/climate/isimip/csvs/earth/",
-        "start-y": 1,
-        "end-y": -1,
-        "start-year": 1971,
-        "end-year": 2005,
-        "start-month": 1,
-        "end-month": 12
+        "start-y": 271, #1,
+        "end-y": 360, #179, #-1,
+        "start-year": 1972,
+        "end-year": 1972, #2005
+        "start-doy": 1,
+        "end-plus-doys": 31
     }
     if len(sys.argv) > 1:
         for arg in sys.argv[1:]:
@@ -99,7 +99,15 @@ def main():
 
     write_files_threshold = 50 #ys
 
-    for (start_year, end_year), elem_to_file in files.iteritems():
+    for (start_year, end_year) in sorted(files.keys()):
+
+        elem_to_file = files[(start_year, end_year)]
+
+        if end_year < config["start-year"]:
+            continue
+        if config["end-year"] < start_year:
+            continue
+
         datasets = {}
         for elem, filepath in elem_to_file.iteritems():
             datasets[elem] = Dataset(filepath) 
@@ -107,7 +115,7 @@ def main():
         sum_days = 0
         for year in range(start_year, end_year + 1):
 
-            start_year = time.clock()
+            clock_start_year = time.clock()
             days_in_year = date(year, 12, 31).timetuple().tm_yday
 
             if year < config["start-year"]:
@@ -116,45 +124,45 @@ def main():
             if year > config["end-year"]:
                 break
 
-            print "year:", year, "sum-days:", sum_days, "ys ->",
+            print "year:", year, "sum-days:", sum_days, "doy_i:", (config["start-doy"] + config["end-plus-doys"]), "ys ->",
 
             days_per_loop = 31
-            for doy_i in range(date(year, config["start-month"], 1).timetuple().tm_yday - 1, days_in_year, days_per_loop):
-
-                if (date(year, config["end-month"] + 1, 1).timetuple().tm_yday - 1 if config["end-month"] < 12 else date(year, 12, 31).timetuple().tm_yday) <= doy_i:
-                    break
+            for doy_i in range(config["start-doy"] - 1, min(config["start-doy"] + config["end-plus-doys"], days_in_year), days_per_loop):
 
                 end_i = doy_i + days_per_loop if doy_i + days_per_loop < days_in_year else days_in_year
-                data = {}
+                data = defaultdict(list)
                 for elem, ds in datasets.iteritems():
-                    data[elem] = np.copy(ds.variables[elem_to_varname[elem]["var"]][sum_days + doy_i : end_i])
+                    for k in range(0, end_i):
+                        data[elem].append(np.copy(ds.variables[elem_to_varname[elem]["var"]][sum_days + doy_i + k]))
+                        #data[elem] = np.copy(ds.variables[elem_to_varname[elem]["var"]][sum_days + doy_i : sum_days + doy_i + end_i])
 
-                ref_data = data["tavg"]
-                no_of_days = ref_data.shape[0]
+                ref_data = data["tavg"][0]
+                no_of_days = len(data["tavg"])
                 cache = defaultdict(list)
 
-                for y in range(config["start-y"] - 1, ref_data.shape[1] if config["end-y"] < 0 else config["end-y"]):
-                    for x in range(ref_data.shape[2]):
+                for y in range(config["start-y"] - 1, ref_data.shape[0] if config["end-y"] < 0 else config["end-y"]):
 
-                        if int(ref_data[0, y, x]) > 1.0E19:
+                    for x in range(ref_data.shape[1]):
+
+                        if int(ref_data[y, x]) > 1.0E19:
                             continue
 
                         for i in range(no_of_days):
                             row = [
-                                (date(year, 1, 1) + timedelta(days=i)).strftime("%Y-%m-%d"),
-                                str(round(data["tmin"][i, y, x] - 273.15, 2)),
-                                str(round(data["tavg"][i, y, x] - 273.15, 2)),
-                                str(round(data["tmax"][i, y, x] - 273.15, 2)),
-                                str(round(data["precip"][i, y, x] * 60 * 60 * 24, 2)),
-                                str(round(data["relhumid"][i, y, x], 2)),
-                                str(round(data["globrad"][i, y, x] * 60 * 60 * 24 / 1000000, 4)),
-                                str(round(data["wind"][i, y, x], 2))
+                                (date(year, 1, 1) + timedelta(days=doy_i + i)).strftime("%Y-%m-%d"),
+                                str(round(data["tmin"][i][y, x] - 273.15, 2)),
+                                str(round(data["tavg"][i][y, x] - 273.15, 2)),
+                                str(round(data["tmax"][i][y, x] - 273.15, 2)),
+                                str(round(data["precip"][i][y, x] * 60 * 60 * 24, 2)),
+                                str(round(data["relhumid"][i][y, x], 2)),
+                                str(round(data["globrad"][i][y, x] * 60 * 60 * 24 / 1000000, 4)),
+                                str(round(data["wind"][i][y, x], 2))
                             ]
                             cache[(y,x)].append(row)
 
                     print y, #str(y) + "|" + str(int(end_y - start_y)) + "s ",
 
-                    if y > config["start-y"] and y % write_files_threshold == 0:
+                    if y > config["start-y"] and (y - config["start-y"]) % write_files_threshold == 0:
                         print ""
                         s = time.clock()
                         write_files(cache)
@@ -167,8 +175,8 @@ def main():
                 #write remaining cache items
                 write_files(cache)
 
-                end_year = time.clock()
-                print "running year", year, "took", (end_year - start_year), "seconds"
+                clock_end_year = time.clock()
+                print "running year", year, "took", (clock_end_year - clock_start_year), "seconds"
 
             sum_days = sum_days + days_in_year
 

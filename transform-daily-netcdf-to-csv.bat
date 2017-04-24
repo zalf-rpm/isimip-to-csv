@@ -14,11 +14,12 @@ rem         python transform-daily-netcdf-to-csv.py start-y=%start_y% end-y=%end
 rem     )
 rem ) 
 
+set doys=30
 echo running years starting at %start_year%
 for /l %%y in (%start_year%,1,2005) do (
-    rem echo year=%%y
-    for /l %%m in (1,1,12) do (
-        rem echo month=%%m
-        python transform-daily-netcdf-to-csv.py start-y=%start_y% end-y=%end_y% start-year=%%y end-year=%%y start-month=%%m end-month=%%m
+    echo year=%%y
+    for /l %%d in (1,31,366) do (
+        echo start_doy=%%d, doys=%doys%
+        python transform-daily-netcdf-to-csv.py start-y=%start_y% end-y=%end_y% start-year=%%y end-year=%%y start-doy=%%d end-plus-doys=%doys%
     )
 )
