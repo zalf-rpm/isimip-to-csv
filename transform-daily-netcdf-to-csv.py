@@ -42,11 +42,11 @@ def main():
         "path_to_data": "m:/data/climate/isimip/grids/daily/" if LOCAL_RUN else "/archiv-daten/md/data/climate/isimip/grids/daily/",
         #"path_to_output": "m:/data/climate/dwd/csvs/germany/" if LOCAL_RUN else "/archiv-daten/md/data/climate/dwd/csvs/germany/",
         "path_to_output": "g:/csvs/earth/" if LOCAL_RUN else "/archiv-daten/md/data/climate/isimip/csvs/earth/",
-        "start-y": 271, #1,
-        "end-y": 360, #179, #-1,
+        "start-y": 1,
+        "end-y": 360, 
         "start-year": 1971,
-        "end-year": 1971, #2005
-        "start-doy": 125,
+        "end-year": 2005,
+        "start-doy": 1,
         "end-plus-doys": 30
     }
     if len(sys.argv) > 1:
@@ -130,14 +130,12 @@ def main():
             for doy_i in range(config["start-doy"] - 1, min(config["start-doy"] + config["end-plus-doys"], days_in_year), days_per_loop):
 
                 end_i = doy_i + days_per_loop if doy_i + days_per_loop < days_in_year else days_in_year
-                data = {} #defaultdict(list)
+                data = {} 
                 for elem, ds in datasets.iteritems():
-                    #for k in range(doy_i, end_i):
-                    #    data[elem].append(np.copy(ds.variables[elem_to_varname[elem]["var"]][sum_days + k]))
                     data[elem] = np.copy(ds.variables[elem_to_varname[elem]["var"]][sum_days + doy_i : sum_days + end_i])
 
-                ref_data = data["tavg"]#[0]
-                no_of_days = ref_data.shape[0] #len(data["tavg"])
+                ref_data = data["tavg"]
+                no_of_days = ref_data.shape[0] 
                 cache = defaultdict(list)
 
                 for y in range(config["start-y"] - 1, ref_data.shape[1] if config["end-y"] < 0 else config["end-y"]):
@@ -157,17 +155,10 @@ def main():
                                 str(round(data["relhumid"][i, y, x], 2)),
                                 str(round(data["globrad"][i, y, x] * 60 * 60 * 24 / 1000000, 4)),
                                 str(round(data["wind"][i, y, x], 2))
-                                #str(round(data["tmin"][i][y, x] - 273.15, 2)),
-                                #str(round(data["tavg"][i][y, x] - 273.15, 2)),
-                                #str(round(data["tmax"][i][y, x] - 273.15, 2)),
-                                #str(round(data["precip"][i][y, x] * 60 * 60 * 24, 2)),
-                                #str(round(data["relhumid"][i][y, x], 2)),
-                                #str(round(data["globrad"][i][y, x] * 60 * 60 * 24 / 1000000, 4)),
-                                #str(round(data["wind"][i][y, x], 2))
                             ]
                             cache[(y,x)].append(row)
 
-                    print y, #str(y) + "|" + str(int(end_y - start_y)) + "s ",
+                    print y, 
 
                     if y > config["start-y"] and (y - config["start-y"]) % write_files_threshold == 0:
                         print ""
