@@ -38,22 +38,36 @@ LOCAL_RUN = True
 
 def main():
 
+    #ilats = set()
+    #ilons = set()
+    #with open("working_resolution_to_climate_lat_lon_indices.json") as _:
+    #    l = json.load(_)
+    #    for i in xrange(0, len(l), 2):
+    #        ilats.add(l[i+1][0])
+    #        ilons.add(l[i+1][1])
+    #print "min-lat:", min(ilats), "max-lat:", max(ilats)
+    #print "min-lon:", min(ilons), "max-lons:", max(ilons)
+
+
     config = {
-        "path_to_data": "m:/data/climate/isimip/grids/daily/" if LOCAL_RUN else "/archiv-daten/md/data/climate/isimip/grids/daily/",
+        "path_to_data": "a:/data/climate/isimip/grids/daily/" if LOCAL_RUN else "/archiv-daten/md/data/climate/isimip/grids/daily/",
         #"path_to_output": "m:/data/climate/dwd/csvs/germany/" if LOCAL_RUN else "/archiv-daten/md/data/climate/dwd/csvs/germany/",
-        "path_to_output": "g:/csvs/earth/" if LOCAL_RUN else "/archiv-daten/md/data/climate/isimip/csvs/earth/",
-        "start-y": 1,
-        "end-y": 360, 
-        "start-year": 1971,
-        "end-year": 2005,
-        "start-doy": 1,
-        "end-plus-doys": 30
+        "path_to_output": "out/" if LOCAL_RUN else "/archiv-daten/md/data/climate/isimip/csvs/earth/",
+        "start-y": "75", #"1",
+        "end-y": "80", #"360", 
+        "start-x": "372", #"1",
+        "end-x": "379", #"720",
+        "start-year": "2091", #"2006", #"1971",
+        "end-year": "2099", #"2005",
+        "start-doy": "1",
+        "end-plus-doys": "366", #"30",
+        "rcp": "rcp2p6" #"hist"
     }
     if len(sys.argv) > 1:
         for arg in sys.argv[1:]:
             kkk, vvv = arg.split("=")
             if kkk in config:
-                config[kkk] = int(vvv)
+                config[kkk] = vvv
 
     elem_to_varname = {
         "tmin": {"prefix": "tasmin_bced_1960_1999", "var": "tasminAdjust", "folder": "tmin/"},
@@ -66,11 +80,15 @@ def main():
     }
 
     files = defaultdict(lambda: defaultdict(dict))
-    for start_year in range(1971, 2005, 10):
-        for elem, dic in elem_to_varname.iteritems():
-            end_year = start_year + (9 if start_year < 2001 else 4)
-            files[(start_year, end_year)][elem] = config["path_to_data"] + dic["folder"] + dic["prefix"] + "_ipsl-cm5a-lr_hist_" + str(start_year) + "-" + str(end_year) + ".nc"
+    if config["rcp"] == "hist":
+        year_ranges = [[start_year, start_year + 9] for start_year in range(1971, 2001, 10)] + [[2001, 2005]]
+    else:
+        year_ranges = [[2006, 2010]] + [[start_year, start_year + 9] for start_year in range(2011, 2091, 10)] + [[2091, 2099]]
 
+    for start_year, end_year in year_ranges:
+        for elem, dic in elem_to_varname.iteritems():
+            files[(start_year, end_year)][elem] = config["path_to_data"] + dic["folder"] + config["rcp"] \
+            + "/" + dic["prefix"] + "_ipsl-cm5a-lr_" + config["rcp"] + "_" + str(start_year) + "-" + str(end_year) + ".nc"
 
     def write_files(cache):
         no_of_files = len(cache)
@@ -103,9 +121,9 @@ def main():
 
         elem_to_file = files[(start_year, end_year)]
 
-        if end_year < config["start-year"]:
+        if end_year < int(config["start-year"]):
             continue
-        if config["end-year"] < start_year:
+        if int(config["end-year"]) < start_year:
             continue
 
         datasets = {}
@@ -118,16 +136,16 @@ def main():
             clock_start_year = time.clock()
             days_in_year = date(year, 12, 31).timetuple().tm_yday
 
-            if year < config["start-year"]:
+            if year < int(config["start-year"]):
                 sum_days = sum_days + days_in_year
                 continue
-            if year > config["end-year"]:
+            if year > int(config["end-year"]):
                 break
 
-            print "year:", year, "sum-days:", sum_days, "doy_i:", (config["start-doy"] + config["end-plus-doys"]), "ys ->",
+            print "year:", year, "sum-days:", sum_days, "doy_i:", (int(config["start-doy"]) + int(config["end-plus-doys"])), "ys ->",
 
             days_per_loop = 31
-            for doy_i in range(config["start-doy"] - 1, min(config["start-doy"] + config["end-plus-doys"], days_in_year), days_per_loop):
+            for doy_i in range(int(config["start-doy"]) - 1, min(int(config["start-doy"]) + int(config["end-plus-doys"]), days_in_year), days_per_loop):
 
                 end_i = doy_i + days_per_loop if doy_i + days_per_loop < days_in_year else days_in_year
                 data = {} 
@@ -138,9 +156,10 @@ def main():
                 no_of_days = ref_data.shape[0] 
                 cache = defaultdict(list)
 
-                for y in range(config["start-y"] - 1, ref_data.shape[1] if config["end-y"] < 0 else config["end-y"]):
+                for y in range(int(config["start-y"]) - 1, ref_data.shape[1] if int(config["end-y"]) < 0 else int(config["end-y"])):
 
-                    for x in range(ref_data.shape[2]):
+                    #for x in range(ref_data.shape[2]):
+                    for x in range(int(config["start-x"]) - 1, ref_data.shape[2] if int(config["end-x"]) < 0 else int(config["end-x"])):
 
                         if int(ref_data[0, y, x]) > 1.0E19:
                             continue
@@ -160,7 +179,7 @@ def main():
 
                     print y, 
 
-                    if y > config["start-y"] and (y - config["start-y"]) % write_files_threshold == 0:
+                    if y > int(config["start-y"]) and (y - int(config["start-y"])) % write_files_threshold == 0:
                         print ""
                         s = time.clock()
                         write_files(cache)
