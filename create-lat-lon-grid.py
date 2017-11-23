@@ -68,9 +68,9 @@ def main():
             lon = round(lons[col], 2)
             ll_line.append(str(lat) + "|" + str(lon))
 
-            is_nodata = temps[row, col] > 1000 or temps[row, col] < -1000
-            dnd_line.append("-" if is_nodata else "x")
-            if is_nodata:
+            is_data = temps[row, col] > -1000 and temps[row, col] < 1000
+            dnd_line.append("x" if is_data else "x")
+            if is_data:
                 json_data["latlon-to-rowcol"].append([[lat, lon], [row, col]])
                 json_data["rowcol-to-latlon"].append([[row, col], [lat, lon]])
         lat_lon_grid_file.write(" ".join(ll_line))
