@@ -52,13 +52,13 @@ def main():
 
     lat_lon_grid_file = open("lat-lon.grid", "w")
     data_no_data_grid_file = open("data-no-data.grid", "w")
-    lat_lon_json_file = open("lat-lon.json", "w")
+    latlon_to_rowcol_json_file = open("latlon-to-rowcol.json", "w")
+    rowcol_to_latlon_json_file = open("rowcol-to-latlon.json", "w")
 
-    lat_lon_grid_file.write("NCOLS 720\n")
-    lat_lon_grid_file.write("NROWS 360\n")
-    data_no_data_grid_file.write("NCOLS 720\n")
-    data_no_data_grid_file.write("NROWS 360\n")
-    json_data = {"latlon-to-rowcol": [], "rowcol-to-latlon": []}
+    lat_lon_grid_file.write("ncols 720\nnrows 360\nnodata_value --------------\n")
+    data_no_data_grid_file.write("ncols 720\nnrows 360\nnodata_value -\n")
+    ll_to_rc_json_data = []
+    rc_to_ll_json_data = []
   
     for row in range(0, 360):
         ll_line = []
@@ -66,13 +66,16 @@ def main():
         for col in range(0, 720):
             lat = round(lats[row], 2)
             lon = round(lons[col], 2)
-            ll_line.append(str(lat) + "|" + str(lon))
 
             is_data = temps[row, col] > -1000 and temps[row, col] < 1000
-            dnd_line.append("x" if is_data else "x")
+            dnd_line.append("x" if is_data else "-")
             if is_data:
-                json_data["latlon-to-rowcol"].append([[lat, lon], [row, col]])
-                json_data["rowcol-to-latlon"].append([[row, col], [lat, lon]])
+                ll_to_rc_json_data.append([[lat, lon], [row, col]])
+                rc_to_ll_json_data.append([[row, col], [lat, lon]])
+                ll_line.append("{:+06.2f}|{:+07.2f}".format(lat, lon))
+            else:
+                ll_line.append("--------------")
+
         lat_lon_grid_file.write(" ".join(ll_line))
         data_no_data_grid_file.write(" ".join(dnd_line))
         if row < 359:
@@ -82,11 +85,13 @@ def main():
         if row % 10 == 0:
             print "wrote line", row
     
-    json.dump(json_data, lat_lon_json_file)#, indent=2)
+    json.dump(ll_to_rc_json_data, latlon_to_rowcol_json_file)#, indent=2)
+    json.dump(rc_to_ll_json_data, rowcol_to_latlon_json_file)#, indent=2)
 
     lat_lon_grid_file.close()
     data_no_data_grid_file.close()
-    lat_lon_json_file.close()
+    latlon_to_rowcol_json_file.close()
+    rowcol_to_latlon_json_file.close()
     ds.close()
 
 main()
