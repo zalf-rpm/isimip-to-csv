@@ -53,15 +53,15 @@ def main():
         "path_to_data": "a:/data/climate/isimip/grids/daily/" if LOCAL_RUN else "/archiv-daten/md/data/climate/isimip/grids/daily/",
         #"path_to_output": "m:/data/climate/dwd/csvs/germany/" if LOCAL_RUN else "/archiv-daten/md/data/climate/dwd/csvs/germany/",
         "path_to_output": "out/" if LOCAL_RUN else "/archiv-daten/md/data/climate/isimip/csvs/earth/",
-        "start-y": "75", #"1",
-        "end-y": "80", #"360", 
-        "start-x": "372", #"1",
-        "end-x": "379", #"720",
-        "start-year": "2091", #"2006", #"1971",
-        "end-year": "2099", #"2005",
+        "start-y": "70", #"75", #"1",
+        "end-y": "70", #"80", #"360", 
+        "start-x": "371", #"372", #"1",
+        "end-x": "393", #"379", #"720",
+        "start-year": "1971", #"2006", #"1971",
+        "end-year": "2005", #"2099", #"2005",
         "start-doy": "1",
         "end-plus-doys": "366", #"30",
-        "rcp": "rcp2p6" #"hist"
+        "rcp": "hist" #"rcp2p6" #"hist"
     }
     if len(sys.argv) > 1:
         for arg in sys.argv[1:]:
