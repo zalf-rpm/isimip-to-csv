@@ -52,16 +52,17 @@ def main():
     config = {
         "path_to_data": "a:/data/climate/isimip/grids/daily/" if LOCAL_RUN else "/archiv-daten/md/data/climate/isimip/grids/daily/",
         #"path_to_output": "m:/data/climate/dwd/csvs/germany/" if LOCAL_RUN else "/archiv-daten/md/data/climate/dwd/csvs/germany/",
-        "path_to_output": "out/" if LOCAL_RUN else "/archiv-daten/md/data/climate/isimip/csvs/earth/",
+        "path_to_output": "out_rcp4p5/" if LOCAL_RUN else "/archiv-daten/md/data/climate/isimip/csvs/earth/",
         "start-y": "70", #"75", #"1",
-        "end-y": "70", #"80", #"360", 
+        "end-y": "87", #"360", 
         "start-x": "371", #"372", #"1",
         "end-x": "393", #"379", #"720",
-        "start-year": "1971", #"2006", #"1971",
-        "end-year": "2005", #"2099", #"2005",
+        "start-year": "2006", #"1971",
+        "end-year": "2099", #"2005",
         "start-doy": "1",
         "end-plus-doys": "366", #"30",
-        "rcp": "hist" #"rcp2p6" #"hist"
+        "model": "ipsl-cm5a-lr", #"hadgem2-es"
+        "rcp": "rcp4p5" #"hist"
     }
     if len(sys.argv) > 1:
         for arg in sys.argv[1:]:
@@ -80,15 +81,21 @@ def main():
     }
 
     files = defaultdict(lambda: defaultdict(dict))
+    start_year = int(config["start-year"])
+    end_year = int(config["end-year"])
     if config["rcp"] == "hist":
-        year_ranges = [[start_year, start_year + 9] for start_year in range(1971, 2001, 10)] + [[2001, 2005]]
+        if config["model"] == "hadgem2-es":
+            start_year = start_year + 1
+        year_ranges = [[year, year + 9] for year in range(start_year, 2001, 10)] + [[2001, end_year]]
+        if config["model"] == "hadgem2-es":
+            year_ranges = [[1950, 1950]] + year_ranges
     else:
-        year_ranges = [[2006, 2010]] + [[start_year, start_year + 9] for start_year in range(2011, 2091, 10)] + [[2091, 2099]]
+        year_ranges = [[start_year, 2010]] + [[year, year + 9] for year in range(2011, 2091, 10)] + [[2091, end_year]]
 
     for start_year, end_year in year_ranges:
         for elem, dic in elem_to_varname.iteritems():
             files[(start_year, end_year)][elem] = config["path_to_data"] + dic["folder"] + config["rcp"] \
-            + "/" + dic["prefix"] + "_ipsl-cm5a-lr_" + config["rcp"] + "_" + str(start_year) + "-" + str(end_year) + ".nc"
+            + "/" + dic["prefix"] + "_" + config["model"] + "_" + config["rcp"] + "_" + str(start_year) + ("-" + str(end_year) if start_year != end_year else "") + ".nc"
 
     def write_files(cache):
         no_of_files = len(cache)
