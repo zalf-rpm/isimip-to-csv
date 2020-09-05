@@ -29,6 +29,11 @@ import time
 from netCDF4 import Dataset
 import numpy as np
 
+#remote debugging via commandline
+#-m ptvsd --host 0.0.0.0 --port 14000 --wait
+
+#------------------------------------------------------------------------------
+
 def main():
 
     #ilats = set()
