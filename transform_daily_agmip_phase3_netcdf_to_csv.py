@@ -85,7 +85,7 @@ def main():
     for file in os.listdir(path):
         if file[-3:] != ".nc":
             continue
-        _gcm, _1, _2, _3, _scen, var, _global, _daily, from_year_str, to_year_str_nc = file.split("_")
+        _gcm, _1, _2, _scen, var, _global, _daily, from_year_str, to_year_str_nc = file.split("_")
         from_year = int(from_year_str)
         to_year = int(to_year_str_nc[:-3])
 
