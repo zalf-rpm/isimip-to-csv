@@ -59,13 +59,16 @@ def main():
         "start_doy": "1",
         "end_plus_doys": "366", #"30",
         "gcm": "GFDL-ESM4", #"GFDL-ESM4 | IPSL-CM6A-LR | MPI-ESM1-2-HR | MRI-ESM2-0 | UKESM1-0-LL"
-        "scen": "historical" #"historical | picontrol | ssp126 | ssp585"
+        "scen": "historical", #"historical | picontrol | ssp126 | ssp585"
+        "write_files_threshold": "50",
+        "days_per_loop": "31"
     }
     if len(sys.argv) > 1:
         for arg in sys.argv[1:]:
             kkk, vvv = arg.split("=")
             if kkk in config:
                 config[kkk] = vvv
+    print("config:", config)
 
     elem_to_var = {
         "tmin": "tasmin",
@@ -121,7 +124,7 @@ def main():
                 print(count, "/", no_of_files, "written")
 
 
-    write_files_threshold = 50 #ys
+    write_files_threshold = int(config["write_files_threshold"]) #50 #ys
 
     for start_year, end_year in sorted(files.keys()):
 
@@ -148,9 +151,9 @@ def main():
             if config["end_year"] and year > int(config["end_year"]):
                 break
 
-            print("year:", year, "sum-days:", sum_days, "doy_i:", (int(config["start_doy"]) + int(config["end_plus_doys"])), "ys ->", end=" ", flush=True)
+            print("year:", year, "sum-days:", sum_days, "ys ->", flush=True)
 
-            days_per_loop = 31
+            days_per_loop = int(config["days_per_loop"]) #31
             for doy_i in range(int(config["start_doy"]) - 1, min(int(config["start_doy"]) + int(config["end_plus_doys"]), days_in_year), days_per_loop):
 
                 end_i = doy_i + days_per_loop if doy_i + days_per_loop < days_in_year else days_in_year
