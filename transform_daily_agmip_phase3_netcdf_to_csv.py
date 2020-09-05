@@ -148,7 +148,7 @@ def main():
             if config["end_year"] and year > int(config["end_year"]):
                 break
 
-            print("year:", year, "sum-days:", sum_days, "doy_i:", (int(config["start_doy"]) + int(config["end_plus_doys"])), "ys ->", end="", flush=True)
+            print("year:", year, "sum-days:", sum_days, "doy_i:", (int(config["start_doy"]) + int(config["end_plus_doys"])), "ys ->", end=" ", flush=True)
 
             days_per_loop = 31
             for doy_i in range(int(config["start_doy"]) - 1, min(int(config["start_doy"]) + int(config["end_plus_doys"]), days_in_year), days_per_loop):
@@ -183,7 +183,7 @@ def main():
                             ]
                             cache[(y,x)].append(row)
 
-                    print(y, end="", flush=True) 
+                    print(y, end=" ", flush=True) 
 
                     if y > int(config["start_y"]) and (y - int(config["start_y"])) % write_files_threshold == 0:
                         print()
