@@ -110,12 +110,12 @@ def main():
 
             path_to_outfile = path_to_outdir + "/col-" + str(x) + ".csv.gz"
             if not os.path.isfile(path_to_outfile):
-                with gzip.open(path_to_outfile, "w") as _:
+                with gzip.open(path_to_outfile, "wb") as _:
                     writer = csv.writer(_, delimiter=",")
                     writer.writerow(["iso-date", "tmin", "tavg", "tmax", "precip", "relhumid", "globrad", "windspeed"])
                     writer.writerow(["[]", "[°C]", "[°C]", "[°C]", "[mm]", "[%]", "[MJ m-2]", "[m s-1]"])
 
-            with gzip.open(path_to_outfile, "a") as _:
+            with gzip.open(path_to_outfile, "ab") as _:
                 writer = csv.writer(_, delimiter=",")
                 for row in rows:
                     writer.writerow(row)
