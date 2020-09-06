@@ -62,7 +62,7 @@ def main():
         "end_plus_doys": "366", #"30",
         "gcm": "GFDL-ESM4", #"GFDL-ESM4 | IPSL-CM6A-LR | MPI-ESM1-2-HR | MRI-ESM2-0 | UKESM1-0-LL"
         "scen": "historical", #"historical | picontrol | ssp126 | ssp585"
-        "write_files_threshold": "50",
+        "write_files_threshold": "365", #"50",
         "days_per_loop": "31"
     }
     if len(sys.argv) > 1:
@@ -237,6 +237,7 @@ def main():
 
     # copy files from scratch to final output
     shutil.copytree(config["path_to_scratch"], config["path_to_output"])
+    shutil.rmtree(config["path_to_scratch"])
 
 
 if __name__ == "__main__":
