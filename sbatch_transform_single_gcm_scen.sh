@@ -15,4 +15,5 @@ END_ROW=$6
 
 PYTHON=~/.conda/envs/nc_to_csv/bin/python
 
-$PYTHON transform_daily_agmip_phase3_netcdf_to_csv.py path_to_scratch=$SCRATCH path_to_output=$OUT gcm=$GCM scen=$SCEN start_y=$START_ROW end_y=$END_ROW start_x=371 end_x=393 end_year=1855
+$PYTHON transform_daily_agmip_phase3_netcdf_to_csv.py path_to_scratch=$SCRATCH path_to_output=$OUT gcm=$GCM scen=$SCEN start_y=$START_ROW end_y=$END_ROW
+
