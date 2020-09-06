@@ -72,6 +72,10 @@ def main():
                 config[kkk] = vvv
     print("config:", config)
 
+    print("deleting previous scratch files from", config["path_to_scratch"])
+    shutil.rmtree(config["path_to_scratch"])
+    print("done deleting scratch files")
+
     elem_to_var = {
         "tmin": "tasmin",
         "tavg": "tas",
