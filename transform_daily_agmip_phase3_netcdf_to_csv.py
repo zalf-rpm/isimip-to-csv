@@ -227,7 +227,7 @@ def main():
                 write_files(cache)
 
                 clock_end_year = time.time()
-                print("running year", year, "took", (clock_end_year - clock_start_year), "seconds")
+                print("running year", year, "(doy currently:", doy_i, ") took", (clock_end_year - clock_start_year), "seconds so far")
 
             sum_days = sum_days + days_in_year
 
@@ -236,8 +236,12 @@ def main():
 
 
     # copy files from scratch to final output
+    print("copying files from", config["path_to_scratch"], "to", config["path_to_output"])
     shutil.copytree(config["path_to_scratch"], config["path_to_output"])
+    print("done copying")
+    print("deleting scratch files from", config["path_to_scratch"])
     shutil.rmtree(config["path_to_scratch"])
+    print("done deleting scratch files")
 
 
 if __name__ == "__main__":
