@@ -73,7 +73,7 @@ def main():
     print("config:", config)
 
     print("deleting previous scratch files from", config["path_to_scratch"])
-    shutil.rmtree(config["path_to_scratch"])
+    shutil.rmtree(config["path_to_scratch"], ignore_errors=True)
     print("done deleting scratch files")
 
     elem_to_var = {
@@ -244,7 +244,7 @@ def main():
     shutil.copytree(config["path_to_scratch"], config["path_to_output"])
     print("done copying")
     print("deleting scratch files from", config["path_to_scratch"])
-    shutil.rmtree(config["path_to_scratch"])
+    shutil.rmtree(config["path_to_scratch"], ignore_errors=True)
     print("done deleting scratch files")
 
 
