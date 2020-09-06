@@ -60,8 +60,8 @@ def main():
         "end_year": None,
         "start_doy": "1",
         "end_plus_doys": "366", #"30",
-        "gcm": "GFDL-ESM4", #"GFDL-ESM4 | IPSL-CM6A-LR | MPI-ESM1-2-HR | MRI-ESM2-0 | UKESM1-0-LL"
-        "scen": "historical", #"historical | picontrol | ssp126 | ssp585"
+        "gcm": "GFDL-ESM4", #GFDL-ESM4 | IPSL-CM6A-LR | MPI-ESM1-2-HR | MRI-ESM2-0 | UKESM1-0-LL
+        "scen": "historical", #historical | picontrol | ssp126 | ssp585
         "write_files_threshold": "365", #"50",
         "days_per_loop": "31"
     }
