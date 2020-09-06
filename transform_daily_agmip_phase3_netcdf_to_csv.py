@@ -23,7 +23,7 @@ import gzip
 import json
 import math
 import os
-#from StringIO import StringIO
+import shutil
 import sys
 import time
 
@@ -50,6 +50,7 @@ def main():
 
     config = {
         "path_to_data": "/beegfs/common/data/climate/isimip/AgMIP.input/phase3",
+        "path_to_scratch": "/scratch/csvs",
         "path_to_output": "/beegfs/common/data/climate/isimip/AgMIP.input_csvs",
         "start_y": "1", #"75", #"1",
         "end_y": None, #"360", 
@@ -99,21 +100,40 @@ def main():
         else:
             continue
 
+    def vaporpress(Tmean, RH):
+        #Tmean °C
+        #RH %
+        eos = 6.11 # hPa
+        Lv = 2.5e6 # J/kg
+        To = 273.16 # K
+        Rv = 461 # J/K/kg
+        #eps = 0.622 # = (Mv/Md)
+
+        #Saturation vapor pressure (es):
+        es = eos * np.exp(Lv/Rv*(1/To - 1/(Tmean + To)))
+
+        # Actual vapor pressure (e):
+        e = es*RH/100.0 ## hPa
+
+        #return (es - e)/10.0 #kPa #VPD
+
+        return e/10.0 #kPa
+
 
     def write_files(cache):
         no_of_files = len(cache)
         count = 0
         for (y, x), rows in cache.items():
-            path_to_outdir = config["path_to_output"] + "/row-" + str(y)
+            path_to_outdir = config["path_to_scratch"] + "/row-" + str(y+1)
             if not os.path.isdir(path_to_outdir):
                 os.makedirs(path_to_outdir)
 
-            path_to_outfile = path_to_outdir + "/col-" + str(x) + ".csv.gz"
+            path_to_outfile = path_to_outdir + "/col-" + str(x+1) + ".csv.gz"
             if not os.path.isfile(path_to_outfile):
                 with gzip.open(path_to_outfile, "wt") as _:
                     writer = csv.writer(_, delimiter=",")
-                    writer.writerow(["iso-date", "tmin", "tavg", "tmax", "precip", "relhumid", "globrad", "windspeed"])
-                    writer.writerow(["[]", "[°C]", "[°C]", "[°C]", "[mm]", "[%]", "[MJ m-2]", "[m s-1]"])
+                    writer.writerow(["iso-date", "tmin", "tavg", "tmax", "precip", "relhumid", "globrad", "wind", "vaporpress"])
+                    writer.writerow(["[]", "[°C]", "[°C]", "[°C]", "[mm]", "[%]", "[MJ m-2]", "[m s-1]", "[kPa]"])
 
             with gzip.open(path_to_outfile, "at") as _:
                 writer = csv.writer(_, delimiter=",")
@@ -175,15 +195,19 @@ def main():
                             continue
 
                         for i in range(no_of_days):
+                            rh = data["relhumid"][i, y, x]
+                            tavg = data["tavg"][i, y, x] - 273.15
+                            vp = vaporpress(tavg, rh)
                             row = [
                                 (date(year, 1, 1) + timedelta(days=doy_i + i)).strftime("%Y-%m-%d"),
                                 str(round(data["tmin"][i, y, x] - 273.15, 2)),
-                                str(round(data["tavg"][i, y, x] - 273.15, 2)),
+                                str(round(tavg, 2)),
                                 str(round(data["tmax"][i, y, x] - 273.15, 2)),
                                 str(round(data["precip"][i, y, x] * 60 * 60 * 24, 2)),
-                                str(round(data["relhumid"][i, y, x], 2)),
+                                str(round(rh, 2)),
                                 str(round(data["globrad"][i, y, x] * 60 * 60 * 24 / 1000000, 4)),
-                                str(round(data["wind"][i, y, x], 2))
+                                str(round(data["wind"][i, y, x], 2)),
+                                str(round(vp, 2))
                             ]
                             cache[(y,x)].append(row)
 
@@ -209,6 +233,10 @@ def main():
 
         for _ in datasets.values():
             _.close()
+
+
+    # copy files from scratch to final output
+    shutil.copytree(config["path_to_scratch"], config["path_to_output"])
 
 
 if __name__ == "__main__":
