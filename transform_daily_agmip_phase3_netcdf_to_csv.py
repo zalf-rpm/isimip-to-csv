@@ -162,6 +162,7 @@ def main():
 
         datasets = {}
         for elem, filepath in elem_to_file.items():
+            print("opening", filepath)
             datasets[elem] = Dataset(filepath) 
 
         sum_days = 0
