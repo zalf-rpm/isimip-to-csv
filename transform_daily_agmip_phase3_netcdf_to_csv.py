@@ -242,7 +242,7 @@ def main():
 
     # copy files from scratch to final output
     print("copying files from", config["path_to_scratch"], "to", config["path_to_output"])
-    shutil.copytree(config["path_to_scratch"], config["path_to_output"])
+    shutil.copytree(config["path_to_scratch"], config["path_to_output"], dirs_exist_ok=True)
     print("done copying")
     print("deleting scratch files from", config["path_to_scratch"])
     shutil.rmtree(config["path_to_scratch"], ignore_errors=True)
