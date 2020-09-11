@@ -44,12 +44,11 @@ def concatenate():
                 config[kkk] = vvv
     print("config:", config)
 
-    #input paths
-
     base_path = config["base_path"]
     gcm = config["gcm"]
     ssp = config["ssp"]
 
+    #input paths
     historical_path = base_path + "/" + gcm + "/historical"
     ssp_path = base_path + "/" + gcm + "/" + ssp
 
@@ -80,7 +79,7 @@ def concatenate():
                 fout.write(fin.read())
             with gzip.open(row_ssp_path + "/" + col, 'rt') as fin:
                 #read header and skip units line
-                header = next(fin)
+                next(fin)
                 next(fin)
                 #write all data
                 fout.write(fin.read())
