@@ -32,7 +32,7 @@ def concatenate():
     config = {
         "base_path": "/beegfs/common/data/climate/isimip/AgMIP.input_csvs",
         "gcm": "GFDL-ESM4 ", #GFDL-ESM4 | IPSL-CM6A-LR | MPI-ESM1-2-HR | MRI-ESM2-0 | UKESM1-0-LL
-        "ssp": "ssp126" #historical | picontrol | ssp126 | ssp585
+        "ssp": "ssp126" # ssp126 | ssp585
     }
     if len(sys.argv) > 1:
         for arg in sys.argv[1:]:
@@ -83,7 +83,7 @@ def concatenate():
                 fout.write(fin.read())
             fout.close()
 
-print("finished!")
+    print("finished!")
 
 if __name__ == "__main__":
     concatenate()
