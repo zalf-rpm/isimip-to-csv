@@ -55,7 +55,7 @@ def main():
         if file[-3:] != ".nc":
             continue
         try:
-            ds = Dataset(file)
+            ds = Dataset(path + "/" + file)
             ds.close()
         except:
             faulty.append(file)
