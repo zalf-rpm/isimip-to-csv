@@ -1,0 +1,7 @@
+#!/usr/bin/python
+# -*- coding: UTF-8
+import sys
+import netCDF4
+ds = netCDF4.Dataset(sys.argv[1])
+ds.close()
+return 0
