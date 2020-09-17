@@ -17,19 +17,8 @@
 
 import time
 import os
-import math
 import json
-import csv
-import itertools
-#import copy
-from StringIO import StringIO
-from datetime import date, datetime, timedelta
-from collections import defaultdict, OrderedDict
-#import types
 import sys
-print sys.path
-#import zmq
-#print "pyzmq version: ", zmq.pyzmq_version(), " zmq version: ", zmq.zmq_version()
 
 from netCDF4 import Dataset
 import numpy as np
@@ -37,7 +26,10 @@ import numpy as np
 def main():
 
     config = {
-        "path-to-data": "C:/Users/berg.ZALF-AD/Desktop/"
+        "path_to_file": "ukesm1-0-ll_r1i1p1f2_w5e5_picontrol_hurs_global_daily_1601_1610.nc",
+        "var_name": "hurs",
+        "lat_var_name": "lat",
+        "lon_var_name": "lon"
     }
     if len(sys.argv) > 1:
         for arg in sys.argv[1:]:
@@ -45,10 +37,10 @@ def main():
             if kkk in config:
                 config[kkk] = vvv
 
-    ds = Dataset(config["path-to-data"] + "tas_bced_1960_1999_ipsl-cm5a-lr_hist_1971-1980.nc")
-    lats = np.copy(ds.variables["lat"])
-    lons = np.copy(ds.variables["lon"])
-    temps = np.copy(ds.variables["tasAdjust"][0])
+    ds = Dataset(config["path_to_file"])
+    lats = np.copy(ds.variables[config["lat_var_name"]])
+    lons = np.copy(ds.variables[config["lon_var_name"]])
+    ref_data = np.copy(ds.variables[config["var_name"]][0])
 
     lat_lon_grid_file = open("lat-lon.grid", "w")
     data_no_data_grid_file = open("data-no-data.grid", "w")
@@ -67,11 +59,11 @@ def main():
             lat = round(lats[row], 2)
             lon = round(lons[col], 2)
 
-            is_data = temps[row, col] > -1000 and temps[row, col] < 1000
+            is_data = int(ref_data[row, col]) < 1.0E19
             dnd_line.append("x" if is_data else "-")
             if is_data:
-                ll_to_rc_json_data.append([[lat, lon], [row, col]])
-                rc_to_ll_json_data.append([[row, col], [lat, lon]])
+                ll_to_rc_json_data.append([[lat, lon], [row+1, col+1]])
+                rc_to_ll_json_data.append([[row+1, col+1], [lat, lon]])
                 ll_line.append("{:+06.2f}|{:+07.2f}".format(lat, lon))
             else:
                 ll_line.append("--------------")
@@ -83,7 +75,7 @@ def main():
             data_no_data_grid_file.write("\n")
 
         if row % 10 == 0:
-            print "wrote line", row
+            print("wrote line", row+1)
     
     json.dump(ll_to_rc_json_data, latlon_to_rowcol_json_file)#, indent=2)
     json.dump(rc_to_ll_json_data, rowcol_to_latlon_json_file)#, indent=2)
