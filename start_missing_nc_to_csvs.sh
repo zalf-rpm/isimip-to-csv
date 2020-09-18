@@ -1,7 +1,6 @@
 #!/bin/sh
 
-sbatch sbatch_transform_single_gcm_scen.sh UKESM1-0-LL picontrol /scratch/csvs /beegfs/common/data/climate/isimip/AgMIP.input_csvs/UKESM1-0-LL/picontrol 1 10
-sbatch sbatch_transform_single_gcm_scen.sh UKESM1-0-LL picontrol /scratch/csvs /beegfs/common/data/climate/isimip/AgMIP.input_csvs/UKESM1-0-LL/picontrol 11 20
+sbatch sbatch_transform_single_gcm_scen.sh UKESM1-0-LL picontrol /scratch/csvs /beegfs/common/data/climate/isimip/AgMIP.input_csvs/UKESM1-0-LL/picontrol 1 20
 sbatch sbatch_transform_single_gcm_scen.sh UKESM1-0-LL picontrol /scratch/csvs /beegfs/common/data/climate/isimip/AgMIP.input_csvs/UKESM1-0-LL/picontrol 21 30
 sbatch sbatch_transform_single_gcm_scen.sh UKESM1-0-LL picontrol /scratch/csvs /beegfs/common/data/climate/isimip/AgMIP.input_csvs/UKESM1-0-LL/picontrol 31 40
 sbatch sbatch_transform_single_gcm_scen.sh UKESM1-0-LL picontrol /scratch/csvs /beegfs/common/data/climate/isimip/AgMIP.input_csvs/UKESM1-0-LL/picontrol 41 50
@@ -22,4 +21,11 @@ sbatch sbatch_transform_single_gcm_scen.sh UKESM1-0-LL picontrol /scratch/csvs /
 sbatch sbatch_transform_single_gcm_scen.sh UKESM1-0-LL picontrol /scratch/csvs /beegfs/common/data/climate/isimip/AgMIP.input_csvs/UKESM1-0-LL/picontrol 191 200
 sbatch sbatch_transform_single_gcm_scen.sh UKESM1-0-LL picontrol /scratch/csvs /beegfs/common/data/climate/isimip/AgMIP.input_csvs/UKESM1-0-LL/picontrol 201 210
 sbatch sbatch_transform_single_gcm_scen.sh UKESM1-0-LL picontrol /scratch/csvs /beegfs/common/data/climate/isimip/AgMIP.input_csvs/UKESM1-0-LL/picontrol 211 220
+sbatch sbatch_transform_single_gcm_scen.sh UKESM1-0-LL picontrol /scratch/csvs /beegfs/common/data/climate/isimip/AgMIP.input_csvs/UKESM1-0-LL/picontrol 221 230
+sbatch sbatch_transform_single_gcm_scen.sh UKESM1-0-LL picontrol /scratch/csvs /beegfs/common/data/climate/isimip/AgMIP.input_csvs/UKESM1-0-LL/picontrol 231 240
+sbatch sbatch_transform_single_gcm_scen.sh UKESM1-0-LL picontrol /scratch/csvs /beegfs/common/data/climate/isimip/AgMIP.input_csvs/UKESM1-0-LL/picontrol 241 250
+sbatch sbatch_transform_single_gcm_scen.sh UKESM1-0-LL picontrol /scratch/csvs /beegfs/common/data/climate/isimip/AgMIP.input_csvs/UKESM1-0-LL/picontrol 251 260
+sbatch sbatch_transform_single_gcm_scen.sh UKESM1-0-LL picontrol /scratch/csvs /beegfs/common/data/climate/isimip/AgMIP.input_csvs/UKESM1-0-LL/picontrol 261 270
+sbatch sbatch_transform_single_gcm_scen.sh UKESM1-0-LL picontrol /scratch/csvs /beegfs/common/data/climate/isimip/AgMIP.input_csvs/UKESM1-0-LL/picontrol 271 280
+sbatch sbatch_transform_single_gcm_scen.sh UKESM1-0-LL picontrol /scratch/csvs /beegfs/common/data/climate/isimip/AgMIP.input_csvs/UKESM1-0-LL/picontrol 281 360
 
