@@ -60,8 +60,8 @@ def main():
         "end_year": None,
         "start_doy": "1",
         "end_plus_doys": "366", #"30",
-        "gcm": "GFDL-ESM4", #GFDL-ESM4 | IPSL-CM6A-LR | MPI-ESM1-2-HR | MRI-ESM2-0 | UKESM1-0-LL
-        "scen": "historical", #historical | picontrol | ssp126 | ssp585
+        "gcm": "GSWP3-W5E5", #GSWP3-W5E5 | GFDL-ESM4 | IPSL-CM6A-LR | MPI-ESM1-2-HR | MRI-ESM2-0 | UKESM1-0-LL
+        "scen": "obsclim", #obsclim | historical | picontrol | ssp126 | ssp585
         "write_files_threshold": "365", #"50",
         "days_per_loop": "31"
     }
@@ -94,7 +94,14 @@ def main():
     for file in os.listdir(path):
         if file[-3:] != ".nc":
             continue
-        _gcm, _1, _2, _scen, var, _global, _daily, from_year_str, to_year_str_nc = file.split("_")
+        split = file.split("_")
+        if len(split) == 9: 
+            _gcm, _1, _2, _scen, var, _global, _daily, from_year_str, to_year_str_nc = split
+        elif len(split) == 7: # for obsclim files
+            _gcm, _scen, var, _global, _daily, from_year_str, to_year_str_nc = split
+        else:
+            print("Error: File ", file, " has unknown filename structure!")
+            exit(1)
         from_year = int(from_year_str)
         to_year = int(to_year_str_nc[:-3])
 
