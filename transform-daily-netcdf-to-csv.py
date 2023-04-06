@@ -50,7 +50,7 @@ def main():
         "end-year": None,  # "2005", #"2099",  # "2005",
         "start-doy": "1",
         "end-plus-doys": "366",  # "30",
-        "model": "hadgem2-es",  # "ipsl-cm5a-lr",  # "hadgem2-es"
+        "model": "ipsl-cm5a-lr",  # "ipsl-cm5a-lr",  # "hadgem2-es"
         "rcp": "hist",  # "rcp4p5",
         "region": "nigeria"  # "germany"
     }
@@ -81,7 +81,7 @@ def main():
         "hadgem2-es": {"his": (1950, 2004), "rcp": (2005, 2099)},
         "ipsl-cm5a-lr": {"his": (1971, 2005), "rcp": (2006, 2099)},
         "miroc-esm-chem": {"his": (1950, 2005), "rcp": (2006, 2099)},
-        "noresm1-m": {"hist": (1950, 2005), "rcp": (2006, 2099)},
+        "noresm1-m": {"his": (1950, 2005), "rcp": (2006, 2099)},
     }
 
     if config["start-year"] is None:
