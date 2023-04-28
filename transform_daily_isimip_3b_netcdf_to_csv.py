@@ -53,7 +53,7 @@ def main():
         "path_to_data": "/run/user/1000/gvfs/sftp:host=login01.cluster.zalf.de,user=rpm/beegfs/common/data/climate/isimip/3b_CMIP6/download/",
         #"path_to_scratch": "/scratch/isimip_3b_csvs/",
         "path_to_scratch": "scratch/isimip_3b_csvs/",
-        #"path_to_output": "/beegfs/common/data/climate/isimip/3b_CMIP6/csvs/
+        #"path_to_output": "/beegfs/common/data/climate/isimip/3b_CMIP6/csvs/",
         "path_to_output": "/run/user/1000/gvfs/sftp:host=login01.cluster.zalf.de,user=rpm/beegfs/common/data/climate/isimip/3b_CMIP6/csvs/",
         "start_y": "1", #"75", #"1",
         "end_y": None, #"360", 
@@ -159,9 +159,9 @@ def main():
                     writer.writerow(row)
 
             count = count + 1
-            if count % 1000 == 0:
+            if count % 50000 == 0:
                 print(count, "/", no_of_files, "files written")
-            print(no_of_files, "files written")
+        print(no_of_files, "files written")
 
 
     write_files_threshold = int(config["write_files_threshold"]) #50 #ys
