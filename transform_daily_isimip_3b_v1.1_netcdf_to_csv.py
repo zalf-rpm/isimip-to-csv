@@ -49,12 +49,12 @@ def main():
 
 
     config = {
-        #"path_to_data": "/beegfs/common/data/climate/isimip/3b_CMIP6/download/",
-        "path_to_data": "/run/user/1000/gvfs/sftp:host=login01.cluster.zalf.de,user=rpm/beegfs/common/data/climate/isimip/3b_CMIP6/download/",
-        #"path_to_scratch": "/scratch/isimip_3b_csvs/",
-        "path_to_scratch": "scratch/isimip_3b_csvs/",
-        #"path_to_output": "/beegfs/common/data/climate/isimip/3b_CMIP6/csvs/",
-        "path_to_output": "/run/user/1000/gvfs/sftp:host=login01.cluster.zalf.de,user=rpm/beegfs/common/data/climate/isimip/3b_CMIP6/csvs/",
+        "path_to_data": "/beegfs/common/data/climate/isimip/3b_CMIP6/download/",
+        #"path_to_data": "/run/user/1000/gvfs/sftp:host=login01.cluster.zalf.de,user=rpm/beegfs/common/data/climate/isimip/3b_CMIP6/download/",
+        "path_to_scratch": "/scratch/isimip_3b_csvs/",
+        #"path_to_scratch": "scratch/isimip_3b_csvs/",
+        "path_to_output": "/beegfs/common/data/climate/isimip/3b_CMIP6/csvs/",
+        #"path_to_output": "/run/user/1000/gvfs/sftp:host=login01.cluster.zalf.de,user=rpm/beegfs/common/data/climate/isimip/3b_CMIP6/csvs/",
         "start_y": "1", #"75", #"1",
         "end_y": None, #"360", 
         "start_x": "1", #"372", #"1",
@@ -75,9 +75,20 @@ def main():
                 config[k] = v.lower() == "true" if v.lower() in ["true", "false"] else v
     print("config:", config)
 
-    print("deleting previous scratch files from", config["path_to_scratch"])
-    shutil.rmtree(config["path_to_scratch"], ignore_errors=True)
-    print("done deleting scratch files")
+    #print("deleting previous scratch files from", config["path_to_scratch"])
+    #shutil.rmtree(config["path_to_scratch"], ignore_errors=True)
+    #print("done deleting scratch files")
+
+    if os.path.exists("/scratch"):
+        print("deleting * in scratch folder")
+        for entry in os.scandir("/scratch"):
+            if entry.is_dir():
+                print(entry.path)
+                #shutil.rmtree(entry.path, ignore_errors=True)
+            elif entry.is_file():
+                print(entry.path)
+                #os.remove(entry.path)
+        print("done deleting * in scratch folder")
 
     elem_to_var = {
         "tmin": "tasmin",
@@ -95,7 +106,8 @@ def main():
     var_to_elem = {v : k for k, v in elem_to_var.items()}
 
     files = defaultdict(dict)
-    
+
+    ensmem_set = set()
     # sort files in dir
     path = config["path_to_data"] 
     for file in os.listdir(path):
@@ -107,6 +119,7 @@ def main():
             if config["scen"].lower() != scen.lower() or config["gcm"].lower() != gcm.lower():
                 #print("skipping file", file, "because of scen or gcm mismatch")
                 continue
+            ensmem_set.add(ensmem)
         else:
             print("Error: File ", file, " has unknown filename structure!")
             exit(1)
@@ -118,6 +131,8 @@ def main():
             files[(from_year, to_year)][var_to_elem[var]] = path + "/" + file 
         else:
             continue
+
+    ensmem = ensmem_set.pop()
 
     def vaporpress(Tmean, RH):
         #Tmean °C
@@ -266,8 +281,9 @@ def main():
 
 
     # copy files from scratch to final output
-    print("copying files from", config["path_to_scratch"], "to", config["path_to_output"])
-    shutil.copytree(config["path_to_scratch"], config["path_to_output"], dirs_exist_ok=False)
+    copy_to_path = config["path_to_output"] + config["gcm"] + "/" + config["scen"] + "/" + str(ensmem) + "/"
+    print("copying files from", config["path_to_scratch"], "to", copy_to_path)
+    shutil.copytree(config["path_to_scratch"], copy_to_path, dirs_exist_ok=True)
     print("done copying")
     print("deleting scratch files from", config["path_to_scratch"])
     shutil.rmtree(config["path_to_scratch"], ignore_errors=True)
