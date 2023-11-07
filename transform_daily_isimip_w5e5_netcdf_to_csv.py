@@ -48,11 +48,11 @@ def main():
 
     config = {
         "path_to_data": "/beegfs/common/data/climate/isimip/W5E5_historical_1979-2019/download/",
-        # "path_to_data": "/run/user/1000/gvfs/sftp:host=login01.cluster.zalf.de,user=rpm/beegfs/common/data/climate/isimip/W5E5_historical_1979-2019/download/",
+        #"path_to_data": "/run/user/1000/gvfs/sftp:host=login01.cluster.zalf.de,user=rpm/beegfs/common/data/climate/isimip/W5E5_historical_1979-2019/download/",
         "path_to_scratch": "/scratch/W5E5_historical_1979-2019/",
-        # "path_to_scratch": "scratch/W5E5_historical_1979-2019/",
+        #"path_to_scratch": "scratch/W5E5_historical_1979-2019/",
         "path_to_output": "/beegfs/common/data/climate/isimip/W5E5_historical_1979-2019/csvs/",
-        # "path_to_output": "/run/user/1000/gvfs/sftp:host=login01.cluster.zalf.de,user=rpm/beegfs/common/data/climate/isimip/W5E5_historical_1979-2019/csvs/",
+        #"path_to_output": "/run/user/1000/gvfs/sftp:host=login01.cluster.zalf.de,user=rpm/beegfs/common/data/climate/isimip/W5E5_historical_1979-2019/csvs/",
         "start_y": "1",  # "75", #"1",
         "end_y": None,  # "360",
         "start_x": "1",  # "372", #"1",
@@ -94,7 +94,7 @@ def main():
         "relhumid": "hurs",
         "specificHumidity": "huss",
         "globrad": "rsds",
-        "wind": "sfcwind",
+        "wind": "sfcWind",
         "snowfallFlux": "prsn",
         "airpress": "ps",
         "surfaceDownwellingLongwaveRadiation": "rlds",
@@ -110,14 +110,15 @@ def main():
     for file in os.listdir(path):
         if file[-3:] != ".nc":
             continue
-        split = file.split("_-")
-        if len(split) == 4:
-            var, _datasetname, from_year_str, to_year_str_nc = split
+        split = file.split("_")
+        if len(split) == 3:
+            var, _datasetname, from_to = split
+            from_year_str, to_year_str_nc = from_to.split("-")
         else:
             print("Error: File ", file, " has unknown filename structure!")
             exit(1)
-        from_year = int(from_year_str)
-        to_year = int(to_year_str_nc[:-3])
+        from_year = int(from_year_str[:4])
+        to_year = int(to_year_str_nc[:4])
 
         # store the paths we are interested in    
         if var in var_to_elem:
